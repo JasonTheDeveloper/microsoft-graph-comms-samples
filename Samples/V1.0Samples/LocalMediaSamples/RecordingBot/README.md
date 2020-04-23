@@ -100,6 +100,28 @@ To verify your policy was assigned correctly:
 
 5. Generate certificates for your reserved domain and install on your machine. Make sure you copy your certificate's thumbprint - we will need this later. To help with this, see https://github.com/jakkaj/sslngrokdevcontiner.
 
+    - Once you run `sslngrokdevcontiner` you should have certificate `pem` files in `C:\...\sslngrokdevcontiner\letsencrypt\archive\YOUR_NGROK_SUBDOMAIN`
+    - To generate a `pfx` file run
+
+      ```bash
+        openssl pkcs12 -inkey privkey1.pem -in cert1.pem -export -out cert.pfx
+      ```
+      - To access `openssl` you may need to install [OpenSSL](https://chocolatey.org/packages/openssl) or use WSL/Ubuntu/bash
+    - To import the certificate, double click on `cert.pfx`
+    - The certificate thumbprint can be found by running "Manager user certificates" or "Manager computer certificates", locating your certificate, opening it, clicking on the "Details" tab, and scrolling to "Thumbprint"
+
+6. Open a SSL port with the command in `cmd`:
+
+    ```cmd
+      netsh http add sslcert ipport=0.0.0.0:9441 certhash=YOUR_CERTIFICATE_THUMBPRINT appid={YOUR_APP_ID}
+    ```
+
+    As an example:
+
+    ```cmd
+      netsh http add sslcert ipport=0.0.0.0:9441 certhash=7339d0267af852084a6db7d0f70b6034cfc576fc appid={7775d4a2-c831-4602-80fb-608f6a1c1b8c}
+    ```
+
 #### RecordingBot
 
 1. Under `Entry`, create a new file called `App.Secrets.config` and copy the following:
@@ -149,3 +171,17 @@ To verify your policy was assigned correctly:
         ```json
             DELETE https://bot.contoso.com/calls/311a0a00-53d9-4a42-aa78-c10a9ae95213
         ```
+
+## Troubleshooting
+
+### ConfigurationErrorsException
+
+If you see:
+
+> System.Configuration.ConfigurationErrorsException: 'The root element must match the name ...
+
+or
+
+> System.Configuration.ConfigurationErrorsException: 'Unrecognized attribute 'file' ...
+
+Please make sure that your `App.Secrets.config` contents matches the sample code in *RecordingBot point 1* and **is not** based on a copy of `App.config`.
